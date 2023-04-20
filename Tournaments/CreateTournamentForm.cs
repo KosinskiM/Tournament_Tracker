@@ -119,15 +119,23 @@ namespace Tournaments
             to.EntryFee = fee;
             to.EnteredTeams = SelectedTeams;
             to.Prizes = SelectedPrizes;
-            
+
             //TODO  create and wire matchups
+            // order our list randomly
+            // check if it is big enough - if not add automatic wins
+            // 2^n power
+            //create our 
 
-
-            GlobalConfig.Connection.CreateTournament(to);
+            TournamentLogic.CreateRounds(to);
 
             //create tournament entry
             //crate all of the prizes entries
             //create all of team entries
+
+
+
+            GlobalConfig.Connection.CreateTournament(to);
+
         }
     }
 }

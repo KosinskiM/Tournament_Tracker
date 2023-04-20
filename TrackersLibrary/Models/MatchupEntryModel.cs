@@ -16,7 +16,7 @@ namespace TrackersLibrary.Models
         public double Score { get; set; }
         public MatchupModel ParentMatchup { get; set; }
 
-
+        /*
 
         /// <summary>
         /// 
@@ -27,6 +27,7 @@ namespace TrackersLibrary.Models
             Score = initialScore;
         
         }
+        */
 
     }
 }
