@@ -164,9 +164,9 @@ namespace TrackersLibrary.DataAccess
             using (IDbConnection connection = new MySqlConnection(GlobalConfig.CnnString(db)))
             {
                 SaveTournament(model,connection);
-                SavePrizes(model, connection);
-                SaveTeamEntries(model, connection);
-
+                SaveTournamentPrizes(model, connection);
+                SaveTournamentEntries(model, connection);
+                SaveTournamentRounds(model, connection);
 
 
 
@@ -174,7 +174,61 @@ namespace TrackersLibrary.DataAccess
             return model;
         }
 
-        private void SaveTeamEntries(TournamentModel model, IDbConnection connection)
+        private void SaveTournamentRounds(TournamentModel model, IDbConnection connection)
+        {
+            //List<List<MatchupModel>> Rounds
+            //List<MatchupEntryModel> Entries
+
+            foreach (List<MatchupModel> round in model.Rounds)
+            {
+                foreach (MatchupModel matchup in round)
+                {
+                    var p = new DynamicParameters();
+                    p.Add("tournament_id", model.Id);
+                    p.Add("matchup_round", matchup.MatchupRound);
+                    p.Add("matchup_id", 0, dbType: DbType.Int32, direction: ParameterDirection.Output);
+
+                    connection.Execute("insert_matchup", p, commandType: CommandType.StoredProcedure);
+
+                    matchup.Id = p.Get<int>("matchup_id");
+
+                    foreach (MatchupEntryModel entry in matchup.Entries)
+                    {
+                        p = new DynamicParameters();
+                        
+                        p.Add("matchup_id", matchup.Id);
+
+                        if (entry.ParentMatchup == null)
+                        {
+                            p.Add("parent_matchup_id", null);
+                        }
+                        else
+                        {
+                            p.Add("parent_matchup_id", entry.ParentMatchup.Id);
+                        }
+
+                        if (entry.TeamCompeting == null)
+                        {
+                            p.Add("team_competing_id", null);
+                        }
+                        else
+                        {
+                            p.Add("team_competing_id", entry.TeamCompeting.Id);
+                        }
+
+                        p.Add("matchup_entry_id", 0, dbType: DbType.Int32, direction: ParameterDirection.Output);
+
+                        connection.Execute("insert_matchup_entry", p, commandType: CommandType.StoredProcedure);
+
+                        entry.Id = p.Get<int>("matchup_entry_id");
+                    }
+                }
+
+            }
+
+        }
+
+        private void SaveTournamentEntries(TournamentModel model, IDbConnection connection)
         {
             foreach (TeamModel team in model.EnteredTeams)
             {
@@ -183,12 +237,12 @@ namespace TrackersLibrary.DataAccess
                 p.Add("tournament_id", model.Id);
                 p.Add("team_id", team.Id);
 
-                connection.Execute("insert_tournamententry", p, commandType: CommandType.StoredProcedure);
+                connection.Execute("insert_tournament_entry", p, commandType: CommandType.StoredProcedure);
             }
 
         }
 
-        private void SavePrizes(TournamentModel model, IDbConnection connection)
+        private void SaveTournamentPrizes(TournamentModel model, IDbConnection connection)
         {
 
             foreach (PrizeModel prize in model.Prizes)
@@ -201,7 +255,6 @@ namespace TrackersLibrary.DataAccess
                 p.Add("prize_percentage", prize.PrizePercentage);
 
                 connection.Execute("insert_prize", p, commandType: CommandType.StoredProcedure);
-                model.Id = p.Get<int>("prize_id");
             }
 
         }
