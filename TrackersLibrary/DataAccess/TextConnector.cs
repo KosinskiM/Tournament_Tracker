@@ -112,8 +112,6 @@ namespace TrackersLibrary.DataAccess
 
         public TournamentModel CreateTournament(TournamentModel model)
         {
-            // TODO finally crate tournament
-
             List<TournamentModel> tournaments = TournamentsFile
                 .FullFilePath()
                 .LoadFile()
@@ -133,6 +131,11 @@ namespace TrackersLibrary.DataAccess
 
             return model;
         
+        }
+
+        public List<TournamentModel> LoadTournaments()
+        {
+            throw new NotImplementedException();
         }
     }
 }

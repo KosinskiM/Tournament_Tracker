@@ -273,5 +273,56 @@ namespace TrackersLibrary.DataAccess
 
         }
 
+
+
+
+
+
+
+
+
+
+        public List<TournamentModel> LoadTournaments()
+        {
+            // TODO finish load tournament method in sql 
+
+            List<TournamentModel> tournaments;
+            List<TeamModel> enteredTeams = new List<TeamModel>();
+            List<PrizeModel> prizes = new List<PrizeModel>();
+
+            //count all participants
+            using (IDbConnection connection = new MySqlConnection(GlobalConfig.CnnString(db)))
+            {
+                tournaments = connection.Query<TournamentModel>("get_tournaments_all", commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList();
+
+                //populate teams
+                foreach (TournamentModel t in tournaments)
+                {
+                    DynamicParameters p = new DynamicParameters();
+                    p.Add("tournament_id",t.Id);
+                    enteredTeams = connection.Query<TeamModel>("get_teamsByTournamentId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList();
+
+                    p = new DynamicParameters();
+                    p.Add("team_id", t.Id);
+                    t.Prizes = connection.Query<PrizeModel>("get_prizesByTournamentId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList();
+
+
+                    foreach (TeamModel tm in enteredTeams)
+                    {
+                        p = new DynamicParameters();
+                        p.Add("team_id", tm.Id);
+                        tm.TeamMembers = connection.Query<ParticipantModel>("get_participantsByTeamId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList(); 
+                    }
+                }
+                //populate prizes
+                
+                //populate rounds
+
+
+
+
+            }
+            return tournaments;
+        }
     }
 }

@@ -120,7 +120,6 @@ namespace Tournaments
             to.EnteredTeams = SelectedTeams;
             to.Prizes = SelectedPrizes;
 
-            //TODO  create and wire matchups
             // order our list randomly
             // check if it is big enough - if not add automatic wins
             // 2^n power

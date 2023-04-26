@@ -25,5 +25,7 @@ namespace TrackersLibrary.DataAccess
 
         List<PrizeModel> LoadPrizes();
 
+        List<TournamentModel> LoadTournaments();
+
     }
 }

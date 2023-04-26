@@ -78,11 +78,11 @@ namespace TrackersLibrary
 
         private static int NumberOfByes(int rounds, int numberOfTeams)
         {
-            int totalTeams = 0;
+            int totalTeams = 1;
 
             for (int i = 1; i <= rounds; i++)
             {
-                totalTeams += 2;
+                totalTeams *= 2;
             }
 
             return (totalTeams - numberOfTeams);
