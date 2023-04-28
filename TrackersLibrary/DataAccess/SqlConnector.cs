@@ -167,9 +167,6 @@ namespace TrackersLibrary.DataAccess
                 SaveTournamentPrizes(model, connection);
                 SaveTournamentEntries(model, connection);
                 SaveTournamentRounds(model, connection);
-
-
-
             }
             return model;
         }
@@ -247,20 +244,35 @@ namespace TrackersLibrary.DataAccess
 
             foreach (PrizeModel prize in model.Prizes)
             {
-                DynamicParameters p = new DynamicParameters();
-                p.Add("prize_id", 0, dbType: DbType.Int32, direction: ParameterDirection.Output);
-                p.Add("place_number", prize.PlaceNumber);
-                p.Add("place_name", prize.PlaceName);
-                p.Add("prize_amount", prize.PrizeAmount);
-                p.Add("prize_percentage", prize.PrizePercentage);
 
-                connection.Execute("insert_prize", p, commandType: CommandType.StoredProcedure);
+
+                ////blad !!!
+                //DynamicParameters p = new DynamicParameters();
+                //p.Add("prize_id", 0, dbType: DbType.Int32, direction: ParameterDirection.Output);
+                //p.Add("place_number", prize.PlaceNumber);
+                //p.Add("place_name", prize.PlaceName);
+                //p.Add("prize_amount", prize.PrizeAmount);
+                //p.Add("prize_percentage", prize.PrizePercentage);
+
+                //connection.Execute("insert_prize", p, commandType: CommandType.StoredProcedure);
+
+                //prize.Id = p.Get<int>("prize_id");
+                ////blad !!
+                
+                DynamicParameters p = new DynamicParameters();
+                p = new DynamicParameters();
+                p.Add("prize_id", prize.Id);
+                p.Add("tournament_id", model.Id);
+
+                connection.Execute("insert_tournament_prize", p, commandType: CommandType.StoredProcedure);
+
             }
 
         }
 
         private void SaveTournament(TournamentModel model, IDbConnection connection)
         {
+            //TODO zmienic sql tak zeby odczytywal id a nie liczyl rekordy
 
             DynamicParameters p = new DynamicParameters();
             p.Add("tournament_name", model.TournamentName);
@@ -287,8 +299,8 @@ namespace TrackersLibrary.DataAccess
             // TODO finish load tournament method in sql 
 
             List<TournamentModel> tournaments;
-            List<TeamModel> enteredTeams = new List<TeamModel>();
-            List<PrizeModel> prizes = new List<PrizeModel>();
+            List<List<MatchupModel>> rounds = new List<List<MatchupModel>>();
+            List<MatchupModel> matchups;
 
             //count all participants
             using (IDbConnection connection = new MySqlConnection(GlobalConfig.CnnString(db)))
@@ -300,28 +312,64 @@ namespace TrackersLibrary.DataAccess
                 {
                     DynamicParameters p = new DynamicParameters();
                     p.Add("tournament_id",t.Id);
-                    enteredTeams = connection.Query<TeamModel>("get_teamsByTournamentId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList();
-
-                    p = new DynamicParameters();
-                    p.Add("team_id", t.Id);
+                    t.EnteredTeams = connection.Query<TeamModel>("get_teamsByTournamentId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList();
                     t.Prizes = connection.Query<PrizeModel>("get_prizesByTournamentId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList();
 
-
-                    foreach (TeamModel tm in enteredTeams)
+                    foreach (TeamModel tm in t.EnteredTeams)
                     {
                         p = new DynamicParameters();
                         p.Add("team_id", tm.Id);
                         tm.TeamMembers = connection.Query<ParticipantModel>("get_participantsByTeamId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList(); 
                     }
+
+                    p = new DynamicParameters();
+                    p.Add("tournament_id", t.Id);
+
+
+                    //populate rounds
+                    List<MatchupModel> round = new List<MatchupModel>();
+                    matchups = (connection.Query<MatchupModel>("get_matchupsByTournamentId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList());
+                    int lastRound = 1;
+                    foreach (MatchupModel matchup in matchups)
+                    {
+                        //populate the winner
+                        if (matchup.WinnerId > 0)
+                        {
+                            p = new DynamicParameters();
+                            p.Add("winner_id", matchup.WinnerId);
+                            p.Add("TeamName", 0, dbType: DbType.String, ParameterDirection.Output);
+                            connection.Execute("get_teamsByWinnerId", p, commandType: CommandType.StoredProcedure);
+                            matchup.Winner.TeamName = p.Get<string>("TeamName");
+
+                            p = new DynamicParameters();
+                            p.Add("team_id", matchup.WinnerId);
+                            matchup.Winner.TeamMembers = connection.Query<ParticipantModel>("get_participantsByTeamId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList();
+                        }
+                        //populate entries
+                        p = new DynamicParameters();
+                        p.Add("matchup_id", matchup.Id);
+                        matchup.Entries = connection.Query<MatchupEntryModel>("get_matchupEntriesByMatchupId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList();
+                    
+
+
+                        if(matchup.MatchupRound == lastRound)
+                        {
+                            round.Add(matchup);
+                        }
+                        else
+                        {
+                            rounds.Add(round);
+                            round = new List<MatchupModel>();
+                            lastRound = matchup.MatchupRound;
+                            round.Add(matchup);
+                        }
+                    }
+                    t.Rounds = rounds;
                 }
-                //populate prizes
-                
-                //populate rounds
-
-
-
-
             }
+
+            //TODO ROUNDS ERROR !!!! check it
+
             return tournaments;
         }
     }

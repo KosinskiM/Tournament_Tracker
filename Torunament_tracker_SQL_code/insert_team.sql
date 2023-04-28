@@ -6,7 +6,7 @@ begin
 	insert into teams (team_name)
     values(team_name);
     
-    select count(*)
+    select max(t.team_id)
     into team_id
-    from teams;
+    from teams t;
 end

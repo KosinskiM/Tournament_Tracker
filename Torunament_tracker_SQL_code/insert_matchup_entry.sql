@@ -8,7 +8,7 @@ begin
 	insert into matchup_entries(matchup_id,parent_matchup_id,team_competing_id)
     values(matchup_id,parent_matchup_id,team_competing_id);
     
-    select count(*)
+    select max(me.matchup_entry_id)
     into matchup_entry_id
-    from matchup_entries;
+    from matchup_entries as me;
 end

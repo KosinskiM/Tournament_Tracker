@@ -7,7 +7,7 @@ begin
 	insert into matchups(tournament_id, matchup_round)
     values(tournament_id, matchup_round);
     
-    select count(*)
+    select max(m.matchup_id)
     into matchup_id
-    from matchups;
+    from matchups as m;
 end

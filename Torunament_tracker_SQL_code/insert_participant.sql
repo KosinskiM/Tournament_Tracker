@@ -9,7 +9,7 @@ begin
 	insert into participants(first_name,last_name,email,phone)
     values(first_name,last_name,email,phone);
     
-	select count(*)
+	select max(p.participant_id)
     into participant_id
-	from participants;
+	from participants as p;
 end

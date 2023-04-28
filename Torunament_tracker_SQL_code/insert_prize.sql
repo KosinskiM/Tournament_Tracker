@@ -13,7 +13,7 @@ begin
         prize_amount,
         prize_percentage);
         
-	select count(*)
+    select max(p.prize_id)
     into prize_id
-    from prizes;
+    from prizes p;
 end

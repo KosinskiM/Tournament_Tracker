@@ -7,7 +7,7 @@ begin
 	insert into tournaments(tournament_name,entry_fee)
     values(tournament_name, entry_fee);
     
-    select count(*)
+    select max(t.tournament_id)
     into tournament_id
-    from tournaments;
+    from tournaments t;
 end

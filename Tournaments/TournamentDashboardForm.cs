@@ -19,7 +19,17 @@ namespace Tournaments
         public TournamentDashboardForm()
         {
             InitializeComponent();
+            WireUpForm();
+            // load tournaments to dropbox ! 
         }
+
+        private void WireUpForm()
+        {
+            loadExisitingTournamentComboBox.DataSource = null;
+            loadExisitingTournamentComboBox.DataSource = tournaments;
+            loadExisitingTournamentComboBox.DisplayMember = "TournamentName";
+        }
+
 
 
     }
