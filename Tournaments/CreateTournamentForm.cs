@@ -19,10 +19,14 @@ namespace Tournaments
         List<TeamModel> SelectedTeams = new List<TeamModel>();
         List<PrizeModel> SelectedPrizes = new List<PrizeModel>();
 
-        public CreateTournamentForm()
+        ITournamentRequestor callingform;
+
+        public CreateTournamentForm(ITournamentRequestor caller)
         {
             InitializeComponent();
             WireUpLists();
+
+            callingform = caller;
         }
 
         private void WireUpLists()
@@ -134,6 +138,11 @@ namespace Tournaments
 
 
             GlobalConfig.Connection.CreateTournament(to);
+
+
+            callingform.TournamentComplete(to);
+
+            this.Close();
 
         }
     }

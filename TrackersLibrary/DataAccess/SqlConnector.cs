@@ -310,6 +310,7 @@ namespace TrackersLibrary.DataAccess
                 //populate teams
                 foreach (TournamentModel t in tournaments)
                 {
+                    rounds.Clear();
                     DynamicParameters p = new DynamicParameters();
                     p.Add("tournament_id",t.Id);
                     t.EnteredTeams = connection.Query<TeamModel>("get_teamsByTournamentId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList();
@@ -329,17 +330,20 @@ namespace TrackersLibrary.DataAccess
                     //populate rounds
                     List<MatchupModel> round = new List<MatchupModel>();
                     matchups = (connection.Query<MatchupModel>("get_matchupsByTournamentId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList());
+
                     int lastRound = 1;
+                    int matchupCounter = 1;
                     foreach (MatchupModel matchup in matchups)
                     {
                         //populate the winner
                         if (matchup.WinnerId > 0)
                         {
-                            p = new DynamicParameters();
-                            p.Add("winner_id", matchup.WinnerId);
-                            p.Add("TeamName", 0, dbType: DbType.String, ParameterDirection.Output);
-                            connection.Execute("get_teamsByWinnerId", p, commandType: CommandType.StoredProcedure);
-                            matchup.Winner.TeamName = p.Get<string>("TeamName");
+                            //p = new DynamicParameters();
+                            //p.Add("winner_id", matchup.WinnerId);
+                            //p.Add("TeamName", 0, dbType: DbType.String, ParameterDirection.Output);
+                            //connection.Execute("get_teamsByWinnerId", p, commandType: CommandType.StoredProcedure);
+                            //matchup.Winner.TeamName = p.Get<string>("TeamName");
+                            matchup.Winner = t.EnteredTeams.Where(x => x.Id == matchup.WinnerId).First();
 
                             p = new DynamicParameters();
                             p.Add("team_id", matchup.WinnerId);
@@ -349,9 +353,9 @@ namespace TrackersLibrary.DataAccess
                         p = new DynamicParameters();
                         p.Add("matchup_id", matchup.Id);
                         matchup.Entries = connection.Query<MatchupEntryModel>("get_matchupEntriesByMatchupId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList();
-                    
 
 
+                        //zmienic ta logike
                         if(matchup.MatchupRound == lastRound)
                         {
                             round.Add(matchup);
@@ -359,10 +363,17 @@ namespace TrackersLibrary.DataAccess
                         else
                         {
                             rounds.Add(round);
+                            lastRound++;
                             round = new List<MatchupModel>();
-                            lastRound = matchup.MatchupRound;
-                            round.Add(matchup);
+                            round.Add(matchup); 
                         }
+
+                        if (matchups.Count == matchupCounter)
+                        {
+                            rounds.Add(round);
+                        }
+
+                        matchupCounter++;
                     }
                     t.Rounds = rounds;
                 }
@@ -372,5 +383,36 @@ namespace TrackersLibrary.DataAccess
 
             return tournaments;
         }
+
+
+
+
+        public void UpdateEntry(MatchupEntryModel entry)
+        {
+            using (IDbConnection connection = new MySqlConnection(GlobalConfig.CnnString(db)))
+            {
+                DynamicParameters p = new DynamicParameters();
+
+                p.Add("entry_id", entry.Id);
+                p.Add("score", entry.Score);
+
+                connection.Execute("update_entryById",p,commandType: CommandType.StoredProcedure);
+            }
+        }
+
+        public void UpdateMatchup(MatchupModel matchup)
+        {
+            using (IDbConnection connection = new MySqlConnection(GlobalConfig.CnnString(db)))
+            {
+                DynamicParameters p = new DynamicParameters();
+
+                p.Add("matchup_id", matchup.Id);
+                p.Add("winner_id", matchup.WinnerId);
+                connection.Execute("update_MatchupById", p, commandType: CommandType.StoredProcedure);
+            }
+        }
+
+
+
     }
 }

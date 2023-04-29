@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.tournamentLabel = new System.Windows.Forms.Label();
-            this.torunamentValue = new System.Windows.Forms.Label();
+            this.tournamentValue = new System.Windows.Forms.Label();
             this.roundLabel = new System.Windows.Forms.Label();
             this.teamOneLabel = new System.Windows.Forms.Label();
             this.teamTwoLabel = new System.Windows.Forms.Label();
@@ -54,15 +54,15 @@
             this.tournamentLabel.TabIndex = 0;
             this.tournamentLabel.Text = "Tournament :";
             // 
-            // torunamentValue
+            // tournamentValue
             // 
-            this.torunamentValue.AutoSize = true;
-            this.torunamentValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.torunamentValue.Location = new System.Drawing.Point(281, 44);
-            this.torunamentValue.Name = "torunamentValue";
-            this.torunamentValue.Size = new System.Drawing.Size(133, 39);
-            this.torunamentValue.TabIndex = 1;
-            this.torunamentValue.Text = "<none>";
+            this.tournamentValue.AutoSize = true;
+            this.tournamentValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tournamentValue.Location = new System.Drawing.Point(281, 44);
+            this.tournamentValue.Name = "tournamentValue";
+            this.tournamentValue.Size = new System.Drawing.Size(133, 39);
+            this.tournamentValue.TabIndex = 1;
+            this.tournamentValue.Text = "<none>";
             // 
             // roundLabel
             // 
@@ -129,6 +129,7 @@
             this.scoreButton.TabIndex = 8;
             this.scoreButton.Text = "Score";
             this.scoreButton.UseVisualStyleBackColor = true;
+            this.scoreButton.Click += new System.EventHandler(this.scoreButton_Click);
             // 
             // teamOneScoreValue
             // 
@@ -162,6 +163,7 @@
             this.matchupListBox.Name = "matchupListBox";
             this.matchupListBox.Size = new System.Drawing.Size(324, 379);
             this.matchupListBox.TabIndex = 12;
+            this.matchupListBox.SelectedIndexChanged += new System.EventHandler(this.matchupListBox_SelectedIndexChanged);
             // 
             // roundComboBox
             // 
@@ -170,6 +172,7 @@
             this.roundComboBox.Name = "roundComboBox";
             this.roundComboBox.Size = new System.Drawing.Size(172, 33);
             this.roundComboBox.TabIndex = 13;
+            this.roundComboBox.SelectedIndexChanged += new System.EventHandler(this.roundComboBox_SelectedIndexChanged);
             // 
             // TournamentViewerFrom
             // 
@@ -189,11 +192,11 @@
             this.Controls.Add(this.teamTwoLabel);
             this.Controls.Add(this.teamOneLabel);
             this.Controls.Add(this.roundLabel);
-            this.Controls.Add(this.torunamentValue);
+            this.Controls.Add(this.tournamentValue);
             this.Controls.Add(this.tournamentLabel);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ForeColor = System.Drawing.Color.Blue;
-            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "TournamentViewerFrom";
             this.Text = "Tournament Viewer";
             this.ResumeLayout(false);
@@ -204,7 +207,7 @@
         #endregion
 
         private System.Windows.Forms.Label tournamentLabel;
-        private System.Windows.Forms.Label torunamentValue;
+        private System.Windows.Forms.Label tournamentValue;
         private System.Windows.Forms.Label roundLabel;
         private System.Windows.Forms.Label teamOneLabel;
         private System.Windows.Forms.Label teamTwoLabel;

@@ -107,6 +107,5 @@ namespace TrackersLibrary
             return teams.OrderBy(x => Guid.NewGuid()).ToList();
         }
 
-
     }
 }

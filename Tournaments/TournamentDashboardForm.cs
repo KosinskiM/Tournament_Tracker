@@ -12,25 +12,41 @@ using TrackersLibrary.Models;
 
 namespace Tournaments
 {
-    public partial class TournamentDashboardForm : Form
+    public partial class TournamentDashboardForm : Form, ITournamentRequestor
     {
-        List<TournamentModel> tournaments = GlobalConfig.Connection.LoadTournaments(); 
+        List<TournamentModel> tournaments = GlobalConfig.Connection.LoadTournaments();
 
         public TournamentDashboardForm()
         {
             InitializeComponent();
-            WireUpForm();
+            WireUpLists();
             // load tournaments to dropbox ! 
         }
 
-        private void WireUpForm()
+
+        private void WireUpLists()
         {
             loadExisitingTournamentComboBox.DataSource = null;
             loadExisitingTournamentComboBox.DataSource = tournaments;
             loadExisitingTournamentComboBox.DisplayMember = "TournamentName";
         }
 
+        private void loadTournamentButton_Click(object sender, EventArgs e)
+        {
+            TournamentViewerFrom form = new TournamentViewerFrom((TournamentModel)loadExisitingTournamentComboBox.SelectedItem);
+            form.Show();
+        }
 
+        private void createTournamentButton_Click(object sender, EventArgs e)
+        {
+            CreateTournamentForm form = new CreateTournamentForm(this);
+            form.Show();
+        }
 
+        public void TournamentComplete(TournamentModel model)
+        {
+            tournaments.Add(model);
+            WireUpLists();
+        }
     }
 }
