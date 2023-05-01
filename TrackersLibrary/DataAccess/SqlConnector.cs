@@ -349,10 +349,20 @@ namespace TrackersLibrary.DataAccess
                             p.Add("team_id", matchup.WinnerId);
                             matchup.Winner.TeamMembers = connection.Query<ParticipantModel>("get_participantsByTeamId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList();
                         }
+
                         //populate entries
                         p = new DynamicParameters();
                         p.Add("matchup_id", matchup.Id);
                         matchup.Entries = connection.Query<MatchupEntryModel>("get_matchupEntriesByMatchupId", p, commandType: CommandType.StoredProcedure).OrderBy(x => x.Id).ToList();
+                        
+                        //populate entries teams
+                        foreach (MatchupEntryModel me in matchup.Entries)
+                        {
+                            if (me.TeamCompetingId != 0)
+                            {
+                                me.TeamCompeting = t.EnteredTeams.Where(x => x.Id == me.TeamCompetingId).First();
+                            }
+                        }
 
 
                         //zmienic ta logike

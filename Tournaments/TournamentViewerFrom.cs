@@ -14,92 +14,100 @@ namespace Tournaments
 {
     public partial class TournamentViewerFrom : Form
     {
-        private List<TeamModel> teams = GlobalConfig.Connection.LoadTeams();
         private TournamentModel tournament;
-        private List<MatchupModel> matchups;
+        List<int> rounds = new List<int>();
+        private List<MatchupModel> selectedMatchups;
 
         public TournamentViewerFrom(TournamentModel tournamentModel)
         {
             InitializeComponent();
             tournament = tournamentModel;
             //rounds = tournamentModel.Rounds;
-            LoadFormData();
-            WireUpRoundList();
-            WireUpMatchupList();
-            matchupListBox.SelectedIndex = 0;
-            WireUpScores();
-        }
 
+            LoadFormData();
+            LoadRounds();
+            LoadMatchups();
+
+            //matchupListBox.SelectedIndex = 0;
+            //LoadScores();
+        }
         private void LoadFormData()
         {
             tournamentValue.Text = tournament.TournamentName;
         }
 
-        private void WireUpRoundList()
+        public void WireUpRounds()
         {
-            List<int> rounds = new List<int>();
+            roundComboBox.DataSource = null;
+            roundComboBox.DataSource = rounds;
+        }
+        public void WireUpMatchups()
+        {
+            matchupListBox.DataSource = null;
+            matchupListBox.DataSource = selectedMatchups;
+            matchupListBox.DisplayMember = "DisplayName";
+        }
+
+
+        private void LoadRounds()
+        {
             var roundCounter = 1;
             foreach (List<MatchupModel> round in tournament.Rounds)
             {
                 rounds.Add(roundCounter);
                 roundCounter++;
-
             }
-            roundComboBox.DataSource = rounds;
+
+            WireUpRounds();
         }
 
-        private void WireUpMatchupList()
+        private void LoadMatchups()
         {
-            matchups = tournament.Rounds[(int)roundComboBox.SelectedItem - 1];
-            List<string>matches = new List<string>();
-
-            foreach (MatchupModel matchup in matchups)
+            int round = (int)roundComboBox.SelectedItem;
+            selectedMatchups = new List<MatchupModel>();
+            foreach (MatchupModel matchup in tournament.Rounds[round - 1])
             {
-
-                StringBuilder matchupName = new StringBuilder();
-                foreach(MatchupEntryModel entry in matchup.Entries)
+                if(matchup.Winner == null || !unplayedOnlyCheckBox.Checked)
                 {
-                    if (entry.TeamCompetingId != 0 && matchup.Entries.Count > 1)
-                    {
-                        int Id = entry.TeamCompetingId;
-                        TeamModel team = teams.Where(x => x.Id == Id).First();
-                        matchupName.Insert(matchupName.Length, team.TeamName + " VS ");
-                    }
+                    selectedMatchups.Add(matchup);
                 }
-                if(matchupName.Length > 0)
+                else
                 {
-                    matchupName.Remove(matchupName.Length - 4, 4);
-                    matches.Add(matchupName.ToString());
+                    selectedMatchups.Add(matchup);
                 }
             }
-            matchupListBox.DataSource = null;
-            matchupListBox.DataSource = matches;
+            WireUpMatchups();
         }
 
-        private void WireUpScores()
+
+        private void LoadMatchup()
         {
             //BUG WITH ODD NUMBER OF ROUNDS
             MatchupModel matchup = tournament.Rounds[(int)roundComboBox.SelectedItem - 1][matchupListBox.SelectedIndex];
             if (matchup.Entries.Count > 1)
             {
-                var counter = 1;
+                var entryCounter = 1;
                 foreach (MatchupEntryModel entry in matchup.Entries)
                 {
-                    int Id = entry.TeamCompetingId;
-                    TeamModel team = teams.Where(x => x.Id == Id).First();
-
-                    if (counter == 1)
+                    if (entry.TeamCompeting != null)
                     {
-                        teamOneLabel.Text = team.TeamName;
-                        teamOneScoreValue.Text = entry.Score.ToString();
-                        counter++;
-                    }
-                    else
-                    {
-                        teamTwoLabel.Text = team.TeamName;
-                        teamTwoScoreValue.Text = entry.Score.ToString();
+                        if (entryCounter == 1)
+                        {
+                            teamOneLabel.Text = entry.TeamCompeting.TeamName;
+                            teamOneScoreValue.Text = entry.Score.ToString();
+                            entryCounter++;
+                        }
+                        else
+                        {
+                            teamTwoLabel.Text = entry.TeamCompeting.TeamName;
+                            teamTwoScoreValue.Text = entry.Score.ToString();
+                        } 
                     }
                 }
+            }
+            else
+            {
+                ClearMatchup();
             }
         }
 
@@ -107,20 +115,20 @@ namespace Tournaments
         {
             if (matchupListBox.SelectedIndex > -1)
             {
-                WireUpScores();
+                LoadMatchup();
             }
             else
             {
-                ClearScores();
+                ClearMatchup();
             }
         }
 
         private void roundComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            WireUpMatchupList();
+            LoadMatchups();
         }
 
-        private void ClearScores()
+        private void ClearMatchup()
         {
             teamOneLabel.Text = "<team one>";
             teamTwoLabel.Text = "<team two>";
@@ -167,6 +175,11 @@ namespace Tournaments
                 }
                 entryCounter++;
             }
+        }
+
+        private void unplayedOnlyCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            LoadMatchups();
         }
     }
 }
