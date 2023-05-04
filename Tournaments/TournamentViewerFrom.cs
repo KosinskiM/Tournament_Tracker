@@ -22,14 +22,11 @@ namespace Tournaments
         {
             InitializeComponent();
             tournament = tournamentModel;
-            //rounds = tournamentModel.Rounds;
 
             LoadFormData();
             LoadRounds();
             LoadMatchups();
-
-            //matchupListBox.SelectedIndex = 0;
-            //LoadScores();
+            DisplayMatchupInfo();
         }
         private void LoadFormData()
         {
@@ -46,6 +43,7 @@ namespace Tournaments
             matchupListBox.DataSource = null;
             matchupListBox.DataSource = selectedMatchups;
             matchupListBox.DisplayMember = "DisplayName";
+            DisplayMatchupInfo();
         }
 
 
@@ -65,13 +63,19 @@ namespace Tournaments
         {
             int round = (int)roundComboBox.SelectedItem;
             selectedMatchups = new List<MatchupModel>();
-            foreach (MatchupModel matchup in tournament.Rounds[round - 1])
+            if (unplayedOnlyCheckBox.Checked)
             {
-                if(matchup.Winner == null || !unplayedOnlyCheckBox.Checked)
+                foreach (MatchupModel matchup in tournament.Rounds[round - 1])
                 {
-                    selectedMatchups.Add(matchup);
+                    if (matchup.Winner == null)
+                    {
+                        selectedMatchups.Add(matchup);
+                    }
                 }
-                else
+            }
+            else
+            {
+                foreach (MatchupModel matchup in tournament.Rounds[round - 1])
                 {
                     selectedMatchups.Add(matchup);
                 }
@@ -101,6 +105,7 @@ namespace Tournaments
                         {
                             teamTwoLabel.Text = entry.TeamCompeting.TeamName;
                             teamTwoScoreValue.Text = entry.Score.ToString();
+                            entryCounter = 1;
                         } 
                     }
                 }
@@ -116,6 +121,7 @@ namespace Tournaments
             if (matchupListBox.SelectedIndex > -1)
             {
                 LoadMatchup();
+                DisplayMatchupInfo();
             }
             else
             {
@@ -126,6 +132,7 @@ namespace Tournaments
         private void roundComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             LoadMatchups();
+            DisplayMatchupInfo();
         }
 
         private void ClearMatchup()
@@ -140,7 +147,8 @@ namespace Tournaments
         {
             //TODO update winners !!! 
 
-            List<MatchupEntryModel> entries = tournament.Rounds[(int)roundComboBox.SelectedItem - 1][matchupListBox.SelectedIndex].Entries;
+            MatchupModel matchup = (MatchupModel)matchupListBox.SelectedItem;
+            List<MatchupEntryModel> entries = matchup.Entries;
 
             var teamCounter = 1;
             var entryCounter = 0;
@@ -148,38 +156,109 @@ namespace Tournaments
             {
                 if (teamCounter == 1)
                 {
-                    entry.Score = int.Parse(teamOneScoreValue.Text);
-                    GlobalConfig.Connection.UpdateEntry(entry);
-                    tournament.Rounds[(int)roundComboBox.SelectedItem - 1][matchupListBox.SelectedIndex].Entries[entryCounter].Score = entry.Score;
-                    teamCounter++;
+                    double scoreVal = 0;
+                    var scoreValid = double.TryParse(teamOneScoreValue.Text, out scoreVal);
+
+                    if(scoreValid)
+                    {
+                        entry.Score = scoreVal;
+                        GlobalConfig.Connection.UpdateEntry(entry);
+                        matchup.Entries[entryCounter].Score = entry.Score;
+                        teamCounter++;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Please enter a valid score for team 1");
+                    }
                 }
                 else
                 {
-                    entry.Score = int.Parse(teamTwoScoreValue.Text);
-                    GlobalConfig.Connection.UpdateEntry(entry);
-                    tournament.Rounds[(int)roundComboBox.SelectedItem - 1][matchupListBox.SelectedIndex].Entries[entryCounter].Score = entry.Score;
-                    teamCounter--;
+                    double scoreVal = 0;
+                    var scoreValid = double.TryParse(teamTwoScoreValue.Text, out scoreVal);
+                    if (scoreValid)
+                    {
+                        entry.Score = scoreVal;
+                        GlobalConfig.Connection.UpdateEntry(entry);
+                        matchup.Entries[entryCounter].Score = entry.Score;
+                        teamCounter--;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Please enter a valid score for team 1");
+                    }
                 }
+
                 if (entryCounter % 2 == 1 && entryCounter > 0)
                 {
                     if(entries[entryCounter].Score > entries[entryCounter - 1].Score)
                     {
-                        tournament.Rounds[(int)roundComboBox.SelectedItem - 1][matchupListBox.SelectedIndex].WinnerId = entries[entryCounter].TeamCompetingId;
-                        GlobalConfig.Connection.UpdateMatchup(tournament.Rounds[(int)roundComboBox.SelectedItem - 1][matchupListBox.SelectedIndex]);
+                        matchup.WinnerId = entries[entryCounter].TeamCompetingId;
+                        matchup.Winner = tournament.EnteredTeams.Where(x => x.Id == matchup.WinnerId).First();
                     }
                     else
                     {
-                        tournament.Rounds[(int)roundComboBox.SelectedItem - 1][matchupListBox.SelectedIndex].WinnerId = entries[entryCounter - 1].TeamCompetingId;
-                        GlobalConfig.Connection.UpdateMatchup(tournament.Rounds[(int)roundComboBox.SelectedItem - 1][matchupListBox.SelectedIndex]);
+                        matchup.WinnerId = entries[entryCounter - 1].TeamCompetingId;
+                        matchup.Winner = tournament.EnteredTeams.Where(x => x.Id == matchup.WinnerId).First();
                     }
                 }
                 entryCounter++;
             }
+            GlobalConfig.Connection.UpdateMatchup(matchup);
+            TournamentLogic.AdvanceMatchupWinner(matchup, tournament);
+            LoadMatchups();
         }
 
         private void unplayedOnlyCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             LoadMatchups();
         }
+
+        private void DisplayMatchupInfo()
+        {
+            MatchupModel matchup = matchupListBox.SelectedItem as MatchupModel;
+
+            if (matchup == null) return;
+
+            bool isPlayed = matchup.Winner != null;
+            bool isSingle = matchup.Entries.Count < 2;
+
+
+            if (!isPlayed && !isSingle)
+            {
+                teamOneLabel.Visible = true;
+                teamOneScoreLabel.Visible = true;
+                teamOneScoreValue.Visible = true;
+                teamTwoLabel.Visible = true;
+                teamTwoScoreLabel.Visible = true;
+                teamTwoScoreValue.Visible = true;
+                versusLabel.Visible = true;
+                scoreButton.Visible = true;
+            }
+            else if(isPlayed && isSingle)
+            {
+                teamOneLabel.Visible = true;
+                teamOneScoreLabel.Visible = true;
+                teamOneScoreValue.Visible = true;
+                teamOneScoreValue.Text = "winner";
+                teamTwoLabel.Visible = false;
+                teamTwoScoreLabel.Visible = false;
+                teamTwoScoreValue.Visible = false;
+                versusLabel.Visible = false;
+                scoreButton.Visible = false;
+            }
+            if (isPlayed && !isSingle)
+            {
+                teamOneLabel.Visible = true;
+                teamOneScoreLabel.Visible = true;
+                teamOneScoreValue.Visible = true;
+                teamTwoLabel.Visible = true;
+                teamTwoScoreLabel.Visible = true;
+                teamTwoScoreValue.Visible = true;
+                versusLabel.Visible = true;
+                scoreButton.Visible = false;
+            }
+
+        }
+
     }
 }

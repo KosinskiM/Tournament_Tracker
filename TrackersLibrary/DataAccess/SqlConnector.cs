@@ -173,9 +173,6 @@ namespace TrackersLibrary.DataAccess
 
         private void SaveTournamentRounds(TournamentModel model, IDbConnection connection)
         {
-            //List<List<MatchupModel>> Rounds
-            //List<MatchupEntryModel> Entries
-
             foreach (List<MatchupModel> round in model.Rounds)
             {
                 foreach (MatchupModel matchup in round)
@@ -189,10 +186,12 @@ namespace TrackersLibrary.DataAccess
 
                     matchup.Id = p.Get<int>("matchup_id");
 
+                    TournamentLogic.AdvanceMatchupWinner(matchup,model);
+
                     foreach (MatchupEntryModel entry in matchup.Entries)
                     {
                         p = new DynamicParameters();
-                        
+
                         p.Add("matchup_id", matchup.Id);
 
                         if (entry.ParentMatchup == null)
@@ -220,9 +219,8 @@ namespace TrackersLibrary.DataAccess
                         entry.Id = p.Get<int>("matchup_entry_id");
                     }
                 }
-
             }
-
+        
         }
 
         private void SaveTournamentEntries(TournamentModel model, IDbConnection connection)
@@ -244,8 +242,6 @@ namespace TrackersLibrary.DataAccess
 
             foreach (PrizeModel prize in model.Prizes)
             {
-
-
                 ////blad !!!
                 //DynamicParameters p = new DynamicParameters();
                 //p.Add("prize_id", 0, dbType: DbType.Int32, direction: ParameterDirection.Output);
@@ -284,15 +280,6 @@ namespace TrackersLibrary.DataAccess
             model.Id = p.Get<int>("tournament_id");
 
         }
-
-
-
-
-
-
-
-
-
 
         public List<TournamentModel> LoadTournaments()
         {
@@ -396,7 +383,7 @@ namespace TrackersLibrary.DataAccess
 
 
 
-
+        
         public void UpdateEntry(MatchupEntryModel entry)
         {
             using (IDbConnection connection = new MySqlConnection(GlobalConfig.CnnString(db)))
@@ -418,7 +405,7 @@ namespace TrackersLibrary.DataAccess
 
                 p.Add("matchup_id", matchup.Id);
                 p.Add("winner_id", matchup.WinnerId);
-                connection.Execute("update_MatchupById", p, commandType: CommandType.StoredProcedure);
+                connection.Execute("update_matchupById", p, commandType: CommandType.StoredProcedure);
             }
         }
 
