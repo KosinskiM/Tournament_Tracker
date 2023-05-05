@@ -121,7 +121,7 @@ namespace Tournaments
             if (matchupListBox.SelectedIndex > -1)
             {
                 LoadMatchup();
-                DisplayMatchupInfo();
+                            DisplayMatchupInfo();
             }
             else
             {
@@ -205,6 +205,8 @@ namespace Tournaments
             }
             GlobalConfig.Connection.UpdateMatchup(matchup);
             TournamentLogic.AdvanceMatchupWinner(matchup, tournament);
+
+            //update modified matchup in sql
             LoadMatchups();
         }
 

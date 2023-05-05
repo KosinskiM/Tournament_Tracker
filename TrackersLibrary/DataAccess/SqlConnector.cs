@@ -180,13 +180,22 @@ namespace TrackersLibrary.DataAccess
                     var p = new DynamicParameters();
                     p.Add("tournament_id", model.Id);
                     p.Add("matchup_round", matchup.MatchupRound);
+                    if (matchup.WinnerId != 0)
+                    {
+                        p.Add("winner_team_id", matchup.WinnerId);
+                    }
+                    else
+                    {
+                        p.Add("winner_team_id", null);
+                    }
+
                     p.Add("matchup_id", 0, dbType: DbType.Int32, direction: ParameterDirection.Output);
 
                     connection.Execute("insert_matchup", p, commandType: CommandType.StoredProcedure);
 
                     matchup.Id = p.Get<int>("matchup_id");
 
-                    TournamentLogic.AdvanceMatchupWinner(matchup,model);
+                    // TODO delete if wrong TournamentLogic.AdvanceMatchupWinner(matchup,model);
 
                     foreach (MatchupEntryModel entry in matchup.Entries)
                     {

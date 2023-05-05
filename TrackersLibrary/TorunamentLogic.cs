@@ -21,6 +21,7 @@ namespace TrackersLibrary
 
             CreateOtherRounds(model, rounds);
             UpdateSingleTeamMatchups(model);
+            AdvanceBuyWinner(model);
         }
 
         private static void CreateOtherRounds(TournamentModel model, int rounds)
@@ -125,8 +126,9 @@ namespace TrackersLibrary
             return tournament;
         }
 
-        public static void AdvanceWinners(TournamentModel tournament)
+        public static void AdvanceBuyWinner(TournamentModel tournament)
         {
+            //zle bo matchup zaczyna id od 0
             for (int i = 0; i < tournament.Rounds.Count - 1; i++)
             {
                 foreach (MatchupModel mRound1 in tournament.Rounds[i])
@@ -137,7 +139,7 @@ namespace TrackersLibrary
                         {
                             foreach(MatchupEntryModel entry in mRound2.Entries)
                             {
-                                if (entry.ParentMatchup.Id == mRound1.Id)
+                                if (entry.ParentMatchup == mRound1)
                                 {
                                     entry.TeamCompetingId = mRound1.WinnerId;
                                     entry.TeamCompeting = mRound1.Winner;
@@ -154,44 +156,16 @@ namespace TrackersLibrary
         {
             if (matchup.Winner != null)
             {
-                if(matchup.MatchupRound + 1 < tournament.Rounds.Count)
+                if(matchup.MatchupRound < tournament.Rounds.Count)
                 {
-                    foreach (MatchupModel m2 in tournament.Rounds[matchup.MatchupRound + 1])
+                    foreach (MatchupModel m2 in tournament.Rounds[matchup.MatchupRound])
                     {
                         foreach (MatchupEntryModel entry in m2.Entries)
                         {
-                            if (entry.ParentMatchup.Id == matchup.Id)
+                            if (entry.ParentMatchup == matchup || entry.ParentMatchupId == matchup.Id)
                             {
-                                entry.TeamCompetingId = m2.WinnerId;
-                                entry.TeamCompeting = m2.Winner;
-                            }
-                        }
-                    }
-                }
-            }
-
-
-
-
-
-
-
-
-            for (int i = 0; i < tournament.Rounds.Count - 1; i++)
-            {
-                foreach (MatchupModel mRound1 in tournament.Rounds[i])
-                {
-                    if (mRound1.Winner != null)
-                    {
-                        foreach (MatchupModel mRound2 in tournament.Rounds[i + 1])
-                        {
-                            foreach (MatchupEntryModel entry in mRound2.Entries)
-                            {
-                                if (entry.ParentMatchupId == mRound1.Id)
-                                {
-                                    entry.TeamCompetingId = mRound1.WinnerId;
-                                    entry.TeamCompeting = mRound1.Winner;
-                                }
+                                entry.TeamCompetingId = matchup.WinnerId;
+                                entry.TeamCompeting = matchup.Winner;
                             }
                         }
                     }
