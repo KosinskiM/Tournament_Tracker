@@ -144,14 +144,12 @@ namespace TrackersLibrary.DataAccess
 
         public void UpdateEntry(MatchupEntryModel entry)
         {
-            //TODO update score text
-            throw new NotImplementedException();
+            entry.UpdateEntryToFile();
         }
 
         public void UpdateMatchup(MatchupModel model)
         {
-            //TODO update matchup text
-            throw new NotImplementedException();
+            model.UpdateMatchupToFile();
         }
     }
 }

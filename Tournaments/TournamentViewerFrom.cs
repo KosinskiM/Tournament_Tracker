@@ -192,12 +192,12 @@ namespace Tournaments
                 {
                     if(entries[entryCounter].Score > entries[entryCounter - 1].Score)
                     {
-                        matchup.WinnerId = entries[entryCounter].TeamCompetingId;
+                        matchup.WinnerId = entries[entryCounter].TeamCompeting.Id;
                         matchup.Winner = tournament.EnteredTeams.Where(x => x.Id == matchup.WinnerId).First();
                     }
                     else
                     {
-                        matchup.WinnerId = entries[entryCounter - 1].TeamCompetingId;
+                        matchup.WinnerId = entries[entryCounter - 1].TeamCompeting.Id;
                         matchup.Winner = tournament.EnteredTeams.Where(x => x.Id == matchup.WinnerId).First();
                     }
                 }
@@ -205,8 +205,6 @@ namespace Tournaments
             }
             GlobalConfig.Connection.UpdateMatchup(matchup);
             TournamentLogic.AdvanceMatchupWinner(matchup, tournament);
-
-            //update modified matchup in sql
             LoadMatchups();
         }
 
