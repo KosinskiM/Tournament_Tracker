@@ -11,25 +11,25 @@ namespace TrackersLibrary.DataAccess
     {
 
         //creation of objects
-        PrizeModel CreatePrize(PrizeModel model);
-        ParticipantModel CreateParticipant(ParticipantModel model);
 
-        TeamModel CreateTeam(TeamModel model);
-
-        TournamentModel CreateTournament(TournamentModel model);
+        /// <summary>
+        /// Method that stores prizes into text file=
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        void CreatePrize(PrizeModel model);
+        void CreateParticipant(ParticipantModel model);
+        void CreateTeam(TeamModel model);
+        void CreateTournament(TournamentModel model);
 
         //reading from storage
         List<ParticipantModel> LoadParticipants();
-
         List<TeamModel> LoadTeams();
-
         List<PrizeModel> LoadPrizes();
-
         List<TournamentModel> LoadTournaments();
 
 
         void UpdateEntry(MatchupEntryModel model);
-
         void UpdateMatchup(MatchupModel model);
 
     }

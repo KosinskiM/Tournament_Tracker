@@ -23,7 +23,7 @@ namespace TrackersLibrary.DataAccess
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public PrizeModel CreatePrize(PrizeModel model)
+        public void CreatePrize(PrizeModel model)
         {
             using (IDbConnection connection = new MySqlConnection(GlobalConfig.CnnString(db)))
             {
@@ -37,8 +37,6 @@ namespace TrackersLibrary.DataAccess
                 connection.Execute("insert_prize", p, commandType: CommandType.StoredProcedure);
 
                 model.Id = p.Get<int>("prize_id");
-
-                return model;
             }
         }
 
@@ -48,7 +46,7 @@ namespace TrackersLibrary.DataAccess
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public ParticipantModel CreateParticipant(ParticipantModel model)
+        public void CreateParticipant(ParticipantModel model)
         {
             using (IDbConnection connection = new MySqlConnection(GlobalConfig.CnnString(db)))
             {
@@ -62,8 +60,6 @@ namespace TrackersLibrary.DataAccess
                 connection.Execute("insert_participant", p, commandType: CommandType.StoredProcedure);
 
                 model.Id = p.Get<int>("participant_id");
-
-                return model;
             }
         }
 
@@ -71,7 +67,7 @@ namespace TrackersLibrary.DataAccess
         /// save new team to database
         /// </summary>
         /// <returns></returns>
-        public TeamModel CreateTeam(TeamModel model)
+        public void CreateTeam(TeamModel model)
         {
             //adding new team to table[teams]
             using (IDbConnection connection = new MySqlConnection(GlobalConfig.CnnString(db)))
@@ -93,11 +89,7 @@ namespace TrackersLibrary.DataAccess
                     m.Add("participant_id", tm.Id);
                     connection.Execute("insert_team_member", m, commandType: CommandType.StoredProcedure);
                 }
-
-                
             }
-
-            return model;
         }
 
 
@@ -159,7 +151,7 @@ namespace TrackersLibrary.DataAccess
 
 
 
-        public TournamentModel CreateTournament(TournamentModel model)
+        public void CreateTournament(TournamentModel model)
         {
             using (IDbConnection connection = new MySqlConnection(GlobalConfig.CnnString(db)))
             {
@@ -168,7 +160,6 @@ namespace TrackersLibrary.DataAccess
                 SaveTournamentEntries(model, connection);
                 SaveTournamentRounds(model, connection);
             }
-            return model;
         }
 
         private void SaveTournamentRounds(TournamentModel model, IDbConnection connection)
@@ -361,7 +352,6 @@ namespace TrackersLibrary.DataAccess
                         }
 
 
-                        //zmienic ta logike
                         if(matchup.MatchupRound == lastRound)
                         {
                             round.Add(matchup);
@@ -370,8 +360,7 @@ namespace TrackersLibrary.DataAccess
                         {
                             rounds.Add(round);
                             lastRound++;
-                            round = new List<MatchupModel>();
-                            round.Add(matchup); 
+                            round = new List<MatchupModel>{matchup};
                         }
 
                         if (matchups.Count == matchupCounter)

@@ -51,7 +51,7 @@ namespace Tournaments
                     CellPhoneNumber = cellphoneValue.Text
                 };
 
-                person = GlobalConfig.Connection.CreateParticipant(person);
+                GlobalConfig.Connection.CreateParticipant(person);
                 selectedParticipants.Add(person);
                 WireUpLists();
 
