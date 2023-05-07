@@ -9,14 +9,6 @@ namespace TrackersLibrary.DataAccess
 {
     public interface IDataConnection
     {
-
-        //creation of objects
-
-        /// <summary>
-        /// Method that stores prizes into text file=
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
         void CreatePrize(PrizeModel model);
         void CreateParticipant(ParticipantModel model);
         void CreateTeam(TeamModel model);

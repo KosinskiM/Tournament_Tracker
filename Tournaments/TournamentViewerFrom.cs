@@ -145,68 +145,79 @@ namespace Tournaments
 
         private void scoreButton_Click(object sender, EventArgs e)
         {
-            //TODO update winners !!! 
+            string errorMessage = ValidateData();
+            if (errorMessage.Length > 0)
+            {
+                MessageBox.Show($"Input Error: { errorMessage }");
+                return;
+            }
 
             MatchupModel matchup = (MatchupModel)matchupListBox.SelectedItem;
             List<MatchupEntryModel> entries = matchup.Entries;
-
             var teamCounter = 1;
             var entryCounter = 0;
             foreach (MatchupEntryModel entry in entries)
             {
                 if (teamCounter == 1)
                 {
-                    double scoreVal = 0;
-                    var scoreValid = double.TryParse(teamOneScoreValue.Text, out scoreVal);
-
-                    if(scoreValid)
-                    {
-                        entry.Score = scoreVal;
-                        GlobalConfig.Connection.UpdateEntry(entry);
-                        matchup.Entries[entryCounter].Score = entry.Score;
-                        teamCounter++;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Please enter a valid score for team 1");
-                    }
+                    entry.Score = double.Parse(teamOneScoreValue.Text);
+                    GlobalConfig.Connection.UpdateEntry(entry);
+                    matchup.Entries[entryCounter].Score = entry.Score;
+                    teamCounter++;
                 }
                 else
                 {
-                    double scoreVal = 0;
-                    var scoreValid = double.TryParse(teamTwoScoreValue.Text, out scoreVal);
-                    if (scoreValid)
-                    {
-                        entry.Score = scoreVal;
-                        GlobalConfig.Connection.UpdateEntry(entry);
-                        matchup.Entries[entryCounter].Score = entry.Score;
-                        teamCounter--;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Please enter a valid score for team 1");
-                    }
+                    entry.Score = double.Parse(teamTwoScoreValue.Text);
+                    GlobalConfig.Connection.UpdateEntry(entry);
+                    matchup.Entries[entryCounter].Score = entry.Score;
+                    teamCounter--;
                 }
-
-                if (entryCounter % 2 == 1 && entryCounter > 0)
-                {
-                    if(entries[entryCounter].Score > entries[entryCounter - 1].Score)
-                    {
-                        matchup.WinnerId = entries[entryCounter].TeamCompeting.Id;
-                        matchup.Winner = tournament.EnteredTeams.Where(x => x.Id == matchup.WinnerId).First();
-                    }
-                    else
-                    {
-                        matchup.WinnerId = entries[entryCounter - 1].TeamCompeting.Id;
-                        matchup.Winner = tournament.EnteredTeams.Where(x => x.Id == matchup.WinnerId).First();
-                    }
-                }
+                TournamentLogic.UpdateWinnersInTournament(entryCounter, matchup);
                 entryCounter++;
             }
             GlobalConfig.Connection.UpdateMatchup(matchup);
             TournamentLogic.AdvanceMatchupWinner(matchup, tournament);
             LoadMatchups();
         }
+
+        private string ValidateData()
+        {
+            string errorMessage = "";
+
+            double teamOneScore = 0;
+            double teamTwoScore = 0;
+
+            var t1valid = double.TryParse(teamOneScoreValue.Text, out teamOneScore);
+            var t2valid = double.TryParse(teamTwoScoreValue.Text, out teamTwoScore);
+
+
+            if (teamOneScore == teamTwoScore)
+            {
+                errorMessage = "Ties are not allowed";
+            }
+            else if(!t1valid)
+            {
+                errorMessage = "Team one score is invalid";
+            }
+            else if(!t2valid)
+            {
+                errorMessage = "Team two score is invalid";
+            }
+            else if(!t1valid && !t2valid)
+            {
+                errorMessage = "Team one and Team two scores are invalid";
+            }
+
+            return errorMessage;
+        }
+
+
+
+
+
+
+
+
 
         private void unplayedOnlyCheckBox_CheckedChanged(object sender, EventArgs e)
         {

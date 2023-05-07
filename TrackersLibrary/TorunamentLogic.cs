@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -173,8 +174,43 @@ namespace TrackersLibrary
             }
         }
 
+        public static void  UpdateWinnersInTournament(int entryCounter , MatchupModel matchup)
+        {
+            string moreOrLessWins = ConfigurationManager.AppSettings["moreOrLessWins"];
+
+            if (entryCounter % 2 == 1 && entryCounter > 0)
+            {
+                if(moreOrLessWins == "1")
+                {
+                    if (matchup.Entries[entryCounter].Score > matchup.Entries[entryCounter - 1].Score)
+                    {
+                        matchup.WinnerId = matchup.Entries[entryCounter].TeamCompeting.Id;
+                        matchup.Winner = matchup.Entries[entryCounter].TeamCompeting;
+                    }
+                    else if(matchup.Entries[entryCounter].Score < matchup.Entries[entryCounter - 1].Score)
+                    {
+                        matchup.WinnerId = matchup.Entries[entryCounter - 1].TeamCompeting.Id;
+                        matchup.Winner = matchup.Entries[entryCounter - 1].TeamCompeting;
+                    } 
+                }
+                else
+                {
+                    if (matchup.Entries[entryCounter].Score < matchup.Entries[entryCounter - 1].Score)
+                    {
+                        matchup.WinnerId = matchup.Entries[entryCounter].TeamCompeting.Id;
+                        matchup.Winner = matchup.Entries[entryCounter].TeamCompeting;
+                    }
+                    else if (matchup.Entries[entryCounter].Score > matchup.Entries[entryCounter - 1].Score)
+                    {
+                        matchup.WinnerId = matchup.Entries[entryCounter - 1].TeamCompeting.Id;
+                        matchup.Winner = matchup.Entries[entryCounter - 1].TeamCompeting;
+                    }
+                }
+            }
+            entryCounter++;
 
 
 
+        }
     }
 }
