@@ -22,12 +22,19 @@ namespace Tournaments
         {
             InitializeComponent();
             tournament = tournamentModel;
+            tournament.OnTournamentComplete += Tournament_OnTournamentComplete;
 
             LoadFormData();
             LoadRounds();
             LoadMatchups();
             DisplayMatchupInfo();
         }
+
+        private void Tournament_OnTournamentComplete(object sender, DateTime e)
+        {
+            this.Close();
+        }
+
         private void LoadFormData()
         {
             tournamentValue.Text = tournament.TournamentName;
@@ -177,6 +184,7 @@ namespace Tournaments
             }
             GlobalConfig.Connection.UpdateMatchup(matchup);
             TournamentLogic.AdvanceMatchupWinner(matchup, tournament);
+
             LoadMatchups();
         }
 

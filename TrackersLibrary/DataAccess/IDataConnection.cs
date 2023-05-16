@@ -24,5 +24,6 @@ namespace TrackersLibrary.DataAccess
         void UpdateEntry(MatchupEntryModel model);
         void UpdateMatchup(MatchupModel model);
 
+        void CompleteTournament(TournamentModel model);
     }
 }

@@ -407,7 +407,15 @@ namespace TrackersLibrary.DataAccess
             }
         }
 
+        public void CompleteTournament(TournamentModel model)
+        {
+            using (IDbConnection connection = new MySqlConnection(GlobalConfig.CnnString(db)))
+            {
+                DynamicParameters p = new DynamicParameters();
 
-
+                p.Add("tournament_id", model.Id);
+                connection.Execute("update_tournamentStatus", p, commandType: CommandType.StoredProcedure);
+            }
+        }
     }
 }
